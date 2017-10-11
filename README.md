@@ -15,7 +15,7 @@ So to start with we'll go with an API that returns all repo's for a given langua
 as that meets the requirements. I worry about the size of the returned content in
 that case, but we'll see how it goes.
 
-- URI: /symantest/v1/github/repos/language/{language}
+- URI: /v1/github/repos/language/{language}
 - Parameters: URI parameter for the language (again let's keep this simple)
 - Response type: Json
 - Response: ```
