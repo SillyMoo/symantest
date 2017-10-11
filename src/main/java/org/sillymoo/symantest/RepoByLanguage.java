@@ -4,29 +4,29 @@ import org.sillymoo.symantest.github.RepositorySearchResponse;
 import org.sillymoo.symantest.github.model.GithubRepository;
 import org.sillymoo.symantest.model.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Path("github/repos/language")
 @Produces("application/json")
+@Component
 public class RepoByLanguage {
 
-    private Client client;
-    private static Pattern pagePattern = Pattern.compile(".*page=(\\d+).*");
+    private final Client client;
+    private final static Pattern pagePattern = Pattern.compile(".*page=(\\d+).*");
 
     @Autowired
     public RepoByLanguage(Client client) {
@@ -60,12 +60,12 @@ public class RepoByLanguage {
             return Response
                     .ok()
                     .link(new URI(uriInfo.getRequestUri()+"?gitHubPage="+page.get()), "next")
-                    .entity(searchResponse)
+                    .entity(repositories)
                     .build();
         } else {
             return Response
                     .ok()
-                    .entity(searchResponse)
+                    .entity(repositories)
                     .build();
         }
 
