@@ -11,12 +11,14 @@ relevant GitHub API is :
 https://developer.github.com/v3/search/#search-repositories."
 
 # The API
-So to start with we'll go with an API that returns all repo's for a given language,
-as that meets the requirements. I worry about the size of the returned content in
-that case, but we'll see how it goes.
+This api allows us to iterate through the github repositories associated with a 
+programming language. The spec implies that we should return all repo's, but this is not
+possible, in part because of API rate limiting, but also I suspect we would quickly blow
+up our memory allocation. So this API is paged.
 
 - URI: /v1/github/repos/language/{language}
-- Parameters: URI parameter for the language (again let's keep this simple)
+- Parameters:
+  - URI parameter for the language (again let's keep this simple)
 - Response type: Json
 - Response: ```
 {
@@ -25,14 +27,15 @@ that case, but we'll see how it goes.
   "url": "...",
   "owner": "..."
 }
+Reponse headers:
+- Link: provides a link to the next page
 ```
 # How to use
 
 # Technologies
-I have implemented using Spring 4, spring boot and Jax-RS. I considered using 
-Spring 4 and reactive web as I want to learn those technologies, but felt it 
-best to stick to what I know for the test.
-I went with Jax-RS as this code will act effectively as glue code doing a call out
-to the github API. Since I don't know the rate of incoming requests or the likely
-performance of the github API I felt that the asynchronous nature of jax-rs was a
-good call to prevent being thread bound.
+- Spring 4
+- Spring Boot
+- Jax-RS
+
+As this is a pretty simple API I have not complicate matters with asynchronous jax-rs,
+but would be pretty easy to restrospectively add it.
