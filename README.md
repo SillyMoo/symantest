@@ -58,7 +58,7 @@ tested.
 
 # How to use
 
-You can download an executable jar from ... To use this jar simply type:
+You can download an executable jar from [https://github.com/SillyMoo/symantest/releases]() To use this jar simply type:
 
 java -jar <jar_name>.jar
 
