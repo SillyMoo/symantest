@@ -34,12 +34,12 @@ Reponse headers:
 - Link: provides a link to the next page
 ```
 
-## Get all version
-This version returns all languages, it uses a StreamedOutput to ensure we don't blow up memory, and parses the X-RateLimit to
-pause for the correct amount of time when we hit the limit. I was running short of time so this version is purely manually
-tested.
+## Get all
+This version returns all repositories for a given language, it uses a StreamedOutput to ensure we don't blow up memory, 
+and parses the X-RateLimit headers to pause for the correct amount of time when we hit the limit. I was running short of 
+time so this api is purely manually tested.
 
-- URI: /v1/github/repos/language/{language}/paged
+- URI: /v1/github/repos/language/{language}
 - Parameters:
   - URI parameter for the language (again let's keep this simple)
 - Response type: Json
@@ -76,7 +76,7 @@ By default the server shall be listening on port 8080
 Due to the limit time available there were a few short cuts taken which could be addressed:
 - Limited testing. Test coverage is not too bad, but error paths have mostly been ignored in order to get the
 basic functionality working. The 'get everything' version has only been manually tested so far.
-- Logging. This is pretty much non-existant at this stage
+- Logging. This is pretty much non-existent at this stage
 - Paging support. I parsed the 'page' query parameter in the link returned by github, this works but this
 parameter is undocumented so it's a risk. It may be better to urlencode the query string of the link returned
 by github.

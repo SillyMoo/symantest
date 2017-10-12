@@ -123,11 +123,9 @@ public class RepoByLanguage {
                             next = null;
                         }
                     }
-                    LOGGER.error("NEXT: "+next);
                 }
                 writer.write("]");
                 writer.flush();
-
             }
         };
         return Response.ok(streamingOutput).build();
@@ -139,7 +137,7 @@ public class RepoByLanguage {
         }
         try {
             String waitUntilStr = response.getHeaderString("X-RateLimit-Reset");
-            LOGGER.error("Waiting rate violation finish");
+            LOGGER.info("Waiting rate violation finish");
             long waitUntil = Long.parseLong(waitUntilStr);
             long now = Instant.now().getEpochSecond();
             long waitFor = (waitUntil-now+1);

@@ -8,5 +8,4 @@ This file is just a top of mind checklist of things I need to consider for the s
 - [x] Component tests
 - [x] Documentation
   - [x] Usage docs
-  - [ ] Rationale of design/tech choices (keep brief)
-  - [ ] JavaDocs, natch
+  - [x] Rationale of design/tech choices (keep brief)
