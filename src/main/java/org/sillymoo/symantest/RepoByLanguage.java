@@ -98,13 +98,13 @@ public class RepoByLanguage {
                 writer.write("[\n");
                 ObjectMapper mapper = new ObjectMapper();
                 while(next!=null){
-                    LOGGER.error("Looping");
+                    LOGGER.info("Looping");
                     WebTarget target = client.target(next);
                     Invocation.Builder builder = target.request();
                     Response response = builder.get();
                     if(response.getStatus()==403) {
                         if(!handlePossibleRateLimitViolation(response)){
-                            LOGGER.error("Failure that was not a rate violation");
+                            LOGGER.info("Failure that was not a rate violation");
                             break;
                         }
                     }else if(response.getStatus()!=200) {
@@ -142,7 +142,8 @@ public class RepoByLanguage {
             LOGGER.error("Waiting rate violation finish");
             long waitUntil = Long.parseLong(waitUntilStr);
             long now = Instant.now().getEpochSecond();
-            Thread.sleep((waitUntil-now+1)*1000);
+            long waitFor = (waitUntil-now+1);
+            Thread.sleep((waitFor<0?1:waitFor)*1000);
         } catch (InterruptedException | NumberFormatException e) {
             return false;
         }
