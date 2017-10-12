@@ -12,9 +12,32 @@ https://developer.github.com/v3/search/#search-repositories."
 
 # The API
 This api allows us to iterate through the github repositories associated with a 
-programming language. The spec implies that we should return all repo's, but this is non-trivial, 
-in part because of API rate limiting, but also I suspect we would quickly blow
-up our memory allocation. So this API is paged.
+programming language.
+
+## Paged version:
+- URI: /v1/github/repos/language/{language}/paged
+- Parameters:
+  - URI parameter for the language (again let's keep this simple)
+- Response type: Json
+- Response:
+```
+[
+  {
+    "id": "...",
+    "name": "...",
+    "url": "...",
+    "owner": "..."
+  },
+...
+]
+Reponse headers:
+- Link: provides a link to the next page
+```
+
+## Get all version
+This version returns all languages, it uses a StreamedOutput to ensure we don't blow up memory, and parses the X-RateLimit to
+pause for the correct amount of time when we hit the limit. I was running short of time so this version is purely manually
+tested.
 
 - URI: /v1/github/repos/language/{language}/paged
 - Parameters:
@@ -22,15 +45,17 @@ up our memory allocation. So this API is paged.
 - Response type: Json
 - Response:
 ```
-{
-  "id": "...",
-  "name": "...",
-  "url": "...",
-  "owner": "..."
-}
-Reponse headers:
-- Link: provides a link to the next page
+[
+  {
+    "id": "...",
+    "name": "...",
+    "url": "...",
+    "owner": "..."
+  },
+...
+]
 ```
+
 # How to use
 
 You can download an executable jar from ... To use this jar simply type:
@@ -50,7 +75,7 @@ By default the server shall be listening on port 8080
 # Productisation
 Due to the limit time available there were a few short cuts taken which could be addressed:
 - Limited testing. Test coverage is not too bad, but error paths have mostly been ignored in order to get the
-basic functionality working.
+basic functionality working. The 'get everything' version has only been manually tested so far.
 - Logging. This is pretty much non-existant at this stage
 - Paging support. I parsed the 'page' query parameter in the link returned by github, this works but this
 parameter is undocumented so it's a risk. It may be better to urlencode the query string of the link returned
@@ -59,3 +84,6 @@ by github.
 propagate some details of the github response to aid investigations.
 - Input validation. It would be possible to inject additional query parameters in to the 'language' parameter. We should
 probably validate the language to confirm it is compliant with github naming rules.
+- Performance. For the 'get everything' version we are very much beholdent to github performance and rate limit rules. Going
+asynchronous won't help that much here, because ultimately we'll still hit the same rate issues no matter how many
+concurrent clients we let connect.

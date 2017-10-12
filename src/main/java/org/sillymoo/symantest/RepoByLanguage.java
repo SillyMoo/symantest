@@ -1,5 +1,7 @@
 package org.sillymoo.symantest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
 import org.sillymoo.symantest.github.RepositorySearchResponse;
 import org.sillymoo.symantest.github.model.GithubRepository;
 import org.sillymoo.symantest.model.Repository;
@@ -12,10 +14,15 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +34,15 @@ public class RepoByLanguage {
 
     private final Client client;
     private final static Pattern pagePattern = Pattern.compile(".*page=(\\d+).*");
+    private Logger LOGGER = Logger.getLogger(RepoByLanguage.class.getName());
 
     @Autowired
     public RepoByLanguage(Client client) {
         this.client = client;
+    }
+
+    private String githubUrlForLanguage(String language) {
+        return githubUrlForLanguage(language, null);
     }
 
     private String githubUrlForLanguage(String language, Integer githubPage){
@@ -73,6 +85,68 @@ public class RepoByLanguage {
                     .build();
         }
 
+    }
+
+    @Path("{language}")
+    @GET
+    public Response getLanguageAllRepos(@PathParam("language") String language) {
+        StreamingOutput streamingOutput = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                String next = githubUrlForLanguage(language);
+                Writer writer = new BufferedWriter(new OutputStreamWriter(output));
+                writer.write("[\n");
+                ObjectMapper mapper = new ObjectMapper();
+                while(next!=null){
+                    LOGGER.error("Looping");
+                    WebTarget target = client.target(next);
+                    Invocation.Builder builder = target.request();
+                    Response response = builder.get();
+                    if(response.getStatus()==403) {
+                        if(!handlePossibleRateLimitViolation(response)){
+                            LOGGER.error("Failure that was not a rate violation");
+                            break;
+                        }
+                    }else if(response.getStatus()!=200) {
+                        break;
+                    } else {
+                        RepositorySearchResponse searchResponse = response.readEntity(RepositorySearchResponse.class);
+                        List<Repository> repos = processSearchResponse(searchResponse);
+                        for(Repository repo: repos) {
+                            StringWriter sw = new StringWriter();
+                            mapper.writeValue(sw, repo);
+                            writer.write(sw.toString());
+                        }
+                        if(response.hasLink("next")) {
+                            next = response.getLink("next").getUri().toString();
+                        } else {
+                            next = null;
+                        }
+                    }
+                    LOGGER.error("NEXT: "+next);
+                }
+                writer.write("]");
+                writer.flush();
+
+            }
+        };
+        return Response.ok(streamingOutput).build();
+    }
+
+    private boolean handlePossibleRateLimitViolation(Response response){
+        if(!response.getHeaderString("X-RateLimit-Remaining").equals("0")){
+            return false;
+        }
+        try {
+            String waitUntilStr = response.getHeaderString("X-RateLimit-Reset");
+            LOGGER.error("Waiting rate violation finish");
+            long waitUntil = Long.parseLong(waitUntilStr);
+            long now = Instant.now().getEpochSecond();
+            Thread.sleep((waitUntil-now+1)*1000);
+        } catch (InterruptedException | NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 
     private static boolean validateSearchResponse(RepositorySearchResponse searchResponse){
