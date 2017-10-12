@@ -7,7 +7,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 @Configuration
-public class HttpClientConfiguration {
+public class ProductionConfiguration {
     @Bean
     public Client client(){
         return ClientBuilder.newClient();

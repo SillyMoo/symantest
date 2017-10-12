@@ -42,19 +42,23 @@ public class RepoByLanguage {
         return uri.toString();
     }
 
-    @Path("{language}")
+    @Path("{language}/paged")
     @GET
-    //TODO error handling when we hit rate limiting errors
     //TODO language validation
     public Response getLanguage(@PathParam("language") String language,
                                 @QueryParam("gitHubPage") Integer gitHubPage,
                                 @Context UriInfo uriInfo) throws URISyntaxException {
         WebTarget target = client.target(githubUrlForLanguage(language, gitHubPage));
         Invocation.Builder builder = target.request();
-        ArrayList<Repository> repositories = new ArrayList<>();
         Response response = builder.get();
+        if(response.getStatus()!= 200) {
+            return Response.status(502).build();
+        }
         RepositorySearchResponse searchResponse = response.readEntity(RepositorySearchResponse.class);
-        ProcessSearchResponse(repositories, searchResponse);
+        if(!validateSearchResponse(searchResponse)){
+            return Response.status(500).build();
+        }
+        ArrayList<Repository> repositories = processSearchResponse(searchResponse);
         Optional<Integer> page = getPage(response);
         if(page.isPresent()) {
             return Response
@@ -71,19 +75,24 @@ public class RepoByLanguage {
 
     }
 
-    private static void ProcessSearchResponse(ArrayList<Repository> repositories,
-                                              RepositorySearchResponse searchResponse) {
+    private static boolean validateSearchResponse(RepositorySearchResponse searchResponse){
+        return !(searchResponse==null || searchResponse.getItems()==null);
+    }
+
+    static ArrayList<Repository> processSearchResponse(RepositorySearchResponse searchResponse) {
+        ArrayList<Repository> repositories = new ArrayList<>(searchResponse.getItems().size());
         for(GithubRepository repo: searchResponse.getItems()) {
             repositories.add(new Repository(
                     repo.getId(),
                     repo.getName(),
-                    repo.getOwner().getLogin(),
-                    repo.getUrl()
+                    repo.getUrl(),
+                    repo.getOwner().getLogin()
             ));
         }
+        return repositories;
     }
 
-    private static Optional<Integer> getPage(Response response) {
+    static Optional<Integer> getPage(Response response) {
         if(response.hasLink("next")) {
             String nextLink = response.getLink("next").getUri().toString();
             Matcher m = pagePattern.matcher(nextLink);
