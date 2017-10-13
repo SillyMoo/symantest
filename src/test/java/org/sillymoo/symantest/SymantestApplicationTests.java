@@ -2,9 +2,6 @@ package org.sillymoo.symantest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-
 import org.sillymoo.symantest.github.RepositorySearchResponse;
 import org.sillymoo.symantest.github.model.GithubRepository;
 import org.sillymoo.symantest.github.model.Owner;
@@ -19,6 +16,9 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,7 +58,7 @@ public class SymantestApplicationTests {
 		when(webTarget.request()).thenReturn(builder);
 		when(builder.get()).thenReturn(response);
 		when(response.readEntity(RepositorySearchResponse.class)).thenReturn(searchResponse);
-		when(response.getStatus()).thenReturn(200);
+		when(response.getStatusInfo()).thenReturn(Response.Status.OK);
 		String body = this.restTemplate.getForObject("/v1/github/repos/language/rust/paged", String.class);
 		assertEquals(
 				"[{\"id\":\"12\",\"name\":\"repo 1\",\"url\":\"http://someplace\",\"owner\":\"fred\"},{\"id\":\"34\",\"name\":\"repo 2\",\"url\":\"http://someotherplace\",\"owner\":\"bob\"}]",

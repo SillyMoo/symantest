@@ -1,4 +1,4 @@
-This file is just a top of mind checklist of things I need to consider for the symantec test.
+This file is just a top of mind checklist of things I need to consider for the Symantec test.
 
 - [x] Pick framework - Going to go with Spring 4 using jax-rs
 - [x] Define API
