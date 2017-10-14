@@ -2,7 +2,6 @@ package org.sillymoo.symantest
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.mockito.Mockito.`when` as on
 import org.mockito.Mockito.mock
 import org.sillymoo.symantest.github.*
 import org.springframework.util.Assert
@@ -11,6 +10,7 @@ import java.net.URISyntaxException
 import java.util.*
 import javax.ws.rs.core.Link
 import javax.ws.rs.core.Response
+import org.mockito.Mockito.`when` as on
 
 
 
@@ -39,12 +39,11 @@ class RepoByLanguageTest {
         on(response.statusInfo).thenReturn(Response.Status.OK)
         val repos = githubResponse(response)
         Assert.isInstanceOf(GithubSuccessNoNext::class.java, repos)
-        var i = 0
 
         for ((repo1, repo2) in searchResponse.items.zip((repos as GithubSuccessNoNext).toRepoList())) {
             assertEquals(repo1.id, repo2.id)
             assertEquals(repo1.name, repo2.name)
-            assertEquals(repo1.owner, repo2.owner)
+            assertEquals(repo1.owner.login, repo2.owner)
             assertEquals(repo1.url, repo2.url)
         }
     }

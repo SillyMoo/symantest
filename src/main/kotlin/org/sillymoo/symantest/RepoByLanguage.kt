@@ -53,11 +53,11 @@ constructor(private val client: Client) {
                 Response
                         .ok()
                         .link(URI(uriInfo.requestUri.toString() + "?gitHubPage=" + repos.page), "next")
-                        .entity(repos.repos)
+                        .entity(repos.toRepoList())
             is GithubSuccessNoNext ->
                 Response
                         .ok()
-                        .entity(repos.repos)
+                        .entity(repos.toRepoList())
         }.build()
     }
 
