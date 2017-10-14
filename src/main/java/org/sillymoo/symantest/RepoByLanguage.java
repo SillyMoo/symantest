@@ -58,7 +58,6 @@ public class RepoByLanguage {
 
     @Path("{language}/paged")
     @GET
-    //TODO language validation
     public Response getLanguage(@PathParam("language") String language,
                                 @QueryParam("gitHubPage") Integer gitHubPage,
                                 @Context UriInfo uriInfo) throws URISyntaxException {
@@ -73,7 +72,7 @@ public class RepoByLanguage {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         ArrayList<Repository> repositories = processSearchResponse(searchResponse);
-        Optional<Integer> page = getPage(response);
+        Optional<Integer> page = getNextPage(response);
         if(page.isPresent()) {
             return Response
                     .ok()
@@ -130,6 +129,11 @@ public class RepoByLanguage {
         return Response.ok(streamingOutput).build();
     }
 
+    /**
+     * Checks for a rate limit violation, if one is found pause until the violation should be resolved
+     * @param response The response from Github
+     * @return True if there was a rate limit violation, otherwise false.
+     */
     private boolean handlePossibleRateLimitViolation(Response response){
         if(!"0".equals(response.getHeaderString("X-RateLimit-Remaining"))){
             return false;
@@ -151,6 +155,12 @@ public class RepoByLanguage {
         return !((null == searchResponse) || (null == searchResponse.getItems()));
     }
 
+    /**
+     * Processes a Github search response, producing a list of repositories in our API's
+     * format.
+     * @param searchResponse The Github search response
+     * @return List of repositories
+     */
     static ArrayList<Repository> processSearchResponse(RepositorySearchResponse searchResponse) {
         ArrayList<Repository> repositories = new ArrayList<>(searchResponse.getItems().size());
         for(GithubRepository repo: searchResponse.getItems()) {
@@ -164,7 +174,12 @@ public class RepoByLanguage {
         return repositories;
     }
 
-    static Optional<Integer> getPage(Response response) {
+    /**
+     * Parses the 'next' link header to extract the next page
+     * @param response The response from Github
+     * @return Either 'Option.Empty' or the next page as an Optional Integer
+     */
+    static Optional<Integer> getNextPage(Response response) {
         if(response.hasLink("next")) {
             String nextLink = response.getLink("next").getUri().toString();
             Matcher m = pagePattern.matcher(nextLink);

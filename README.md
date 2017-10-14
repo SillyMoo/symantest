@@ -74,6 +74,9 @@ By default the server shall be listening on port 8080
 
 # Productisation
 Due to the limit time available there were a few short cuts taken which could be addressed:
+- Github Library - Currently the interaction with the github API is intermixed with the our front
+end code. Ideally this would be refactored to separate the logic of Github from the logic of our
+own API.
 - Limited testing. Test coverage is not too bad, but error paths have mostly been ignored in order to get the
 basic functionality working. The 'get everything' version has only been manually tested so far.
 - Logging. This is pretty much non-existent at this stage

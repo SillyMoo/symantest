@@ -56,17 +56,17 @@ public class RepoByLanguageTest {
         Response response = mock(Response.class);
         Link link = mock(Link.class);
         when(response.hasLink("next")).thenReturn(false);
-        assertEquals(Optional.empty(),RepoByLanguage.getPage(response));
+        assertEquals(Optional.empty(),RepoByLanguage.getNextPage(response));
 
         when(response.hasLink("next")).thenReturn(true);
         when(response.getLink("next")).thenReturn(link);
         when(link.getUri()).thenReturn(new URI("http://somegiberish.com"));
-        assertEquals(Optional.empty(), RepoByLanguage.getPage(response));
+        assertEquals(Optional.empty(), RepoByLanguage.getNextPage(response));
 
         when(response.hasLink("next")).thenReturn(true);
         when(response.getLink("next")).thenReturn(link);
         when(link.getUri()).thenReturn(new URI("http://somegiberish.com?page=12345"));
-        assertEquals(Optional.of(12345), RepoByLanguage.getPage(response));
+        assertEquals(Optional.of(12345), RepoByLanguage.getNextPage(response));
     }
 
 }
