@@ -10,6 +10,9 @@ how to execute it. You may use open source libraries where available, the
 relevant GitHub API is : 
 https://developer.github.com/v3/search/#search-repositories."
 
+I wanted to have a play around with Kotlin, so this is a Kotlin version. This is just for a
+bit of fun.
+
 # The API
 This api allows us to iterate through the github repositories associated with a 
 programming language.
@@ -58,10 +61,8 @@ time so this api is purely manually tested.
 
 # How to use
 
-You can download an executable jar from [releases](https://github.com/SillyMoo/symantest/releases) To use this jar simply type:
-
-java -jar <jar_name>.jar
-
+You can only run this from gradle, so just use:
+```gradle bootRun```
 By default the server shall be listening on port 8080
 
 # Key technologies
@@ -74,9 +75,6 @@ By default the server shall be listening on port 8080
 
 # Productisation
 Due to the limit time available there were a few short cuts taken which could be addressed:
-- Github Library - Currently the interaction with the github API is intermixed with the our front
-end code. Ideally this would be refactored to separate the logic of Github from the logic of our
-own API.
 - Limited testing. Test coverage is not too bad, but error paths have mostly been ignored in order to get the
 basic functionality working. The 'get everything' version has only been manually tested so far.
 - Logging. This is pretty much non-existent at this stage
