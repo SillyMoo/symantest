@@ -58,7 +58,7 @@ time so this api is purely manually tested.
 
 # How to use
 
-You can download an executable jar from [https://github.com/SillyMoo/symantest/releases]() To use this jar simply type:
+You can download an executable jar from [releases](https://github.com/SillyMoo/symantest/releases) To use this jar simply type:
 
 java -jar <jar_name>.jar
 
