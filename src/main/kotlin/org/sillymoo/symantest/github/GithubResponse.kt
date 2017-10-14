@@ -4,13 +4,6 @@ import java.time.Instant
 import java.util.regex.Pattern
 import javax.ws.rs.core.Response
 
-sealed class GithubResponse(val response: Response) {
-    interface HasRepos {
-        val response: Response
-        val repos: RepositorySearchResponse
-            get() = response.readEntity(RepositorySearchResponse::class.java)
-    }
-}
 fun githubResponse(response: Response):GithubResponse =
         when(response.statusInfo) {
             Response.Status.FORBIDDEN ->
@@ -26,6 +19,15 @@ fun githubResponse(response: Response):GithubResponse =
             else ->
                 GithubError(response)
         }
+
+sealed class GithubResponse(val response: Response) {
+    interface HasRepos {
+        val response: Response
+        val repos: RepositorySearchResponse
+            get() = response.readEntity(RepositorySearchResponse::class.java)
+    }
+}
+
 class GithubForbidden(response: Response): GithubResponse(response) {
     /**
      * Checks for a rate limit violation, if one is found pause until the violation should be resolved
@@ -54,8 +56,7 @@ class GithubError(response: Response) : GithubResponse(response)
 class GithubSuccessNoNext(response: Response) : GithubResponse(response), GithubResponse.HasRepos
 class GithubSuccessWithNext(response: Response) : GithubResponse(response), GithubResponse.HasRepos {
     private val pagePattern = Pattern.compile(".*page=(\\d+).*")
-    val next: String
-        get() = response.getLink("next").uri.toString()
+    val next: String = response.getLink("next").uri.toString()
     val page: Int
         get() {
             val m = pagePattern.matcher(next)
